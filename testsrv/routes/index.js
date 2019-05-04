@@ -15,9 +15,10 @@ router.get('/', function(req, res, next) {
 
 
 
-router.get('/list/:id', function(req, res, next) {
+router.get('/find/:collection/:id', function(req, res, next) {
     const id = req.params.id;
-    db.listingsAndReviews.find({_id:id.toString()}, function (err, doc) {
+    const collection = req.params.collection;
+    db.collection(collection).find({_id:id.toString()}, function (err, doc) {
         res.json(doc);
         console.log(id)
     })
@@ -56,8 +57,8 @@ router.get('/list', function(req, res, next) {
   
 });
 
-router.post('/insert/:id', function(req, res, next) {
-    const id = req.params.id
+router.post('/insert/:collection', function(req, res, next) {
+    const id = req.params.collection
     let body = req.body;
     db.collection(id).insert(body,function(err, doc) {
         res.status(200).send("Success");
