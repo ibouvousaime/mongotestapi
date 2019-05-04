@@ -65,10 +65,11 @@ router.post('/insert/:collection', function(req, res, next) {
     });
 });
 
-router.post('/new', function(req, res, next) {
+router.post('/new/:name', function(req, res, next) {
     let body = req.body;
-    db.createCollection(body.name,{}, function (err, doc) {
-        res.status(200).send("Collection : "+ body.name + " has been created");
+    const name = req.params.name
+    db.createCollection(name,{}, function (err, doc) {
+        res.status(200).send("Collection : "+ name + " has been created");
     });
 });
 
