@@ -61,7 +61,11 @@ router.post('/insert/:collection', function(req, res, next) {
     const id = req.params.collection
     let body = req.body;
     db.collection(id).insert(body,function(err, doc) {
-        res.status(200).send("Success");
+        if (err) {
+            res.status(200).send(JSON.stringify(err));
+        }
+        else 
+        res.status(200).send(JSON.stringify({res:"success"}));
     });
 });
 
@@ -69,7 +73,11 @@ router.post('/new/:name', function(req, res, next) {
     let body = req.body;
     const name = req.params.name
     db.createCollection(name,{}, function (err, doc) {
-        res.status(200).send("Collection : "+ name + " has been created");
+        if (err) {
+            res.status(200).send({res: err.message});
+        }
+        else 
+        res.status(200).send({res: "Collection : "+ name + " has been created"});
     });
 });
 
