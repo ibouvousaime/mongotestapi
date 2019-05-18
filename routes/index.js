@@ -2,11 +2,18 @@ var express = require('express');
 var router = express.Router();
 var mongojs = require('mongojs')
 const _ = require('underscore')
-
+var nodemailer = require('nodemailer');
 const db = mongojs("mongodb://ab_ibrahima:FR2DwqIROWHmLlgX@cluster0-shard-00-02-zl8ja.mongodb.net:27017,cluster0-shard-00-00-zl8ja.mongodb.net:27017,cluster0-shard-00-01-zl8ja.mongodb.net:27017/sample_airbnb?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true")
 
 
-
+function generateString(len) {
+    var result  = "";
+    var alpha = "abcdefjhijklmopqrstuvwxyz0123456789"
+    for(let i =0; i < len; i++) {
+      result += alpha[Math.floor(Math.random() * alpha.length)];
+    }
+    return result;
+  }
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -80,5 +87,49 @@ router.post('/new/:name', function(req, res, next) {
         res.status(200).send({res: "Collection : "+ name + " has been created"});
     });
 });
+router.post('/searchUser', function(req, res, next) {
+  var body = req.body;
+  let user = body.u
+  let pass = body.p
+  let found = false;
+  console.log(user + " " + pass);
+  db.collection('value1').findOne({n:user,pa:pass}, function (err,doc) {
+    console.log("err" + err);
+    console.log("doc" + JSON.stringify(doc));
 
+    if (err) {
+      res.status(400).send(JSON.stringify(err));
+    }
+    else {
+      found = true;
+      res.status(200).send(JSON.stringify(doc));
+    }
+  });
+});
+
+router.get('/sendForgot/:email', function(req, res, next) { 
+    const email = req.params.email
+    var token = generateString(100);
+    var transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: 'wustenbaby@gmail.com',
+          pass: 'zerglingSwarm123'
+        }
+      });
+      
+      var mailOptions = {
+        from: 'wustenbaby@gmail.com',
+        to: email,
+        subject: 'Test',
+        text: 'Follow this link to continue http://localhost:4200/token/'+ token
+      };
+      transporter.sendMail(mailOptions, function(err, info){
+        if (err) {
+          console.log(err);
+        } else {
+          res.status(200).send(JSON.stringify({res:info.response}));
+        }
+      });
+});
 module.exports = router;
