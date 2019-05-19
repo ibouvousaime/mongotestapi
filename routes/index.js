@@ -76,6 +76,26 @@ router.post('/insert/:collection', function(req, res, next) {
     });
 });
 
+
+
+
+router.post('/changePass', function(req, res, next) {
+  let body = req.body;
+  db.collection('value1').findAndModify({
+    query : {n: body.e},
+    update: { $set :{pa : body.p}},
+    new :true
+  },function(err,doc,lastErr) {
+        console.log(doc);
+      if (!err) {
+        res.status(200).send({r:true,d:doc});
+      }
+      else {
+        res.status(200).send({r:false,d:err});
+      }
+  })
+});
+
 router.post('/new/:name', function(req, res, next) {
     let body = req.body;
     const name = req.params.name
@@ -107,9 +127,37 @@ router.post('/searchUser', function(req, res, next) {
   });
 });
 
+router.post('/searchToken', function(req, res, next) {
+  var body = req.body;
+  let token = body.tok;
+  console.log(token);
+  let result = db.collection('adede').findOne({tok:token}, 
+    function (err,doc) {
+      if (err) {
+        res.status(200).send(JSON.stringify({d:doc,ok:false}))        }
+      else {
+        res.status(200).send(JSON.stringify({d:doc,ok:true}));
+        }
+      } 
+    );
+});
+
+function storeToken (token, dest) {
+  db.collection('adede').insert({email:dest, tok: token},function (err, doc) {
+    if(err) {
+      console.log(err);
+      return false;
+    }
+    else {
+      return true;
+    }
+  });
+}
+
 router.get('/sendForgot/:email', function(req, res, next) { 
     const email = req.params.email
-    var token = generateString(100);
+    var token = generateString(20);
+    storeToken(token,email);
     var transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
@@ -125,6 +173,7 @@ router.get('/sendForgot/:email', function(req, res, next) {
         text: 'Follow this link to continue http://localhost:4200/token/'+ token
       };
       transporter.sendMail(mailOptions, function(err, info){
+        console.log(info);
         if (err) {
           console.log(err);
         } else {
